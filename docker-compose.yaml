@@ -10,15 +10,14 @@ services:
                     - modlib.tus-server-local
         ports:
             - ${TUS_SERVER_PORT}:${TUS_SERVER_PORT}
-        depends_on:
-            - adminer
-            - minio-init
-            - redisinsight
+        # depends_on:
+        #     - postgresql
+        #     - minio
+        #     - redis
         env_file:
             - ./.env
         volumes: 
             - ./tus-server:/usr/local/app
-            - ./prisma:/usr/local/prisma
         logging:
             driver: "json-file"
             options:
