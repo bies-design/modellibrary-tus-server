@@ -2,14 +2,14 @@ services:
     tus-server-local:
         # container_name: tus-server-local
         image: biescloudtechsupport/node:24.0-slim
-        working_dir: /usr/local/app
-        command: bash -c "pwd && ls -l && bash ./tus-server_init.sh dev"
+        working_dir: /usr/local
+        command: bash -c "pwd && ls -l && cd app && ls -l && bash ./tus-server_init.sh dev"
         # networks:
         #     modlib:
         #         aliases:
         #             - modlib.tus-server-local
         ports:
-            - ${TUS_SERVER_PORT}:${TUS_SERVER_PORT}
+            - ${TARGET_HOST}:${TUS_SERVER_PORT}:${TUS_SERVER_PORT}
         # depends_on:
         #     - postgresql
         #     - minio
@@ -17,7 +17,7 @@ services:
         # env_file:
         #     - ./.env
         volumes: 
-            - ./:/usr/local/app
+            - .:/usr/local/app
         logging:
             driver: "json-file"
             options:
