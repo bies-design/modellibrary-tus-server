@@ -2,8 +2,8 @@ services:
     tus-server-local:
         # container_name: tus-server-local
         image: biescloudtechsupport/node:24.0-slim
-        working_dir: /usr/local
-        command: bash -c "cd app && bash tus-server_init.sh dev"
+        working_dir: /usr/local/app
+        command: bash -c "pwd && ls -l && bash ./tus-server_init.sh dev"
         # networks:
         #     modlib:
         #         aliases:
