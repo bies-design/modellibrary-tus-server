@@ -225,13 +225,13 @@ app.delete(/files/, (req: any, res: any) => {
 });
 
 // 拒絕其他所有請求 (GET, POST, etc.)
-// app.all(/(.*)/, (req, res) => {
-//     res.status(403).json({
-//         success: false,
-//         message: `${process.env.TUS_SERVER_HOST} 無法受理此請求 (Request Not Accepted)`,
-//         timestamp: new Date().toISOString()
-//     });
-// });
+app.all(/(.*)/, (req, res) => {
+    res.status(403).json({
+        success: false,
+        message: `${process.env.TUS_SERVER_HOST} 無法受理此請求 (Request Not Accepted)`,
+        timestamp: new Date().toISOString()
+    });
+});
 
 // 啟動伺服器
 server.listen(PORT, HOST, () => {
