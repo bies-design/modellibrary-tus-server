@@ -33,7 +33,7 @@ else
     printf "task ${BIYellow} production ${NC} mode ...\n"
 fi
 
-cd /usr/local/app
+# cd /usr/local/app
 
 if [ -f "./${ARGC}" ]; then
     printf "task ${Blue} ${ARGC} ${NC} ${UPurple} start ... ${NC}\n"
@@ -44,4 +44,6 @@ else
     ## debug ##
     pwd
     ls -l
+    printf "search this file ..."
+    find /usr/local -iname "${ARGC}" -type f
 fi
