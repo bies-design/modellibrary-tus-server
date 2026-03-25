@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "update": "npm install && npm audit fix",
-    "dev": "tsx watch server.ts",
+    "dev": "tsx watch server.ts"
     // "build": "tsc",
     // "start": "node dist/server.js"
   },
