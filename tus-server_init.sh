@@ -1,21 +1,30 @@
 #/bin/bash
 
 # ARGC
-if [ ! -z "$1" ]; then
-    ARGC=$1
-elif [ ! -z "${BRANCH}"]
+if [ ! -z "${BRANCH}"]
     ARGC="${BRANCH}"
+elif [ ! -z "$1" ]; then
+    ARGC=$1
 else
     ARGC="prod"
 fi
+
+echo "Wellcome to use Tus-Server ... "
+date "+%Y/%m/%dT%T--%z"
+echo "=================work for ${ARGC}"
 
 if [ "${ARGC}" == "dev" ]; then
     echo "Running in development mode..."
     if [ -e .tusserverinit ]; then
         rm .tusserverinit
     fi
-else
+elif [ "${ARGC}" == "prod" ]; then
     echo "Running in production mode..."
+else
+    echo "Running in [${ARGC}] mode..."
+    # if [ -e .tusserverinit ]; then
+    #     rm .tusserverinit
+    # fi
 fi
 
 if [ ! -f .tusserverinit ]; then
@@ -31,6 +40,7 @@ else
 fi
 
 if [ "${ARGC}" == "dev" ]; then
+    echo "Waiting virtual working env. be created ..."
     npm run dev
 else
     # build and start the tus-server in production mode

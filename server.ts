@@ -1,10 +1,6 @@
 // server.js
 import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });  // 用 process.cwd() 代替 __dirname
-
-console.log("DEBUG: S3_IFC_BUCKET =", process.env.S3_IFC_BUCKET); // 👈 檢查這行有沒有印出東西
-
 import express from 'express';
 import cors from 'cors';
 import { Server, EVENTS } from '@tus/server';
@@ -17,6 +13,15 @@ import IORedis from 'ioredis';
 import {nanoid} from 'nanoid';
 import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+
+const result = dotenv.config({ path: path.resolve(process.cwd(), '.env') });  // 用 process.cwd() 代替 __dirname
+if (result.error){
+    console.warn("Warning: [!] 沒有實體 .env 檔案，將嘗試從環境變數讀取。");
+}
+else{
+    console.log("DEBUG: Tus-Server working type =", process.env.BRANCH); // 👈 檢查這行有沒有印出東西
+}
+
 // import { int } from 'zod';
 // 初始化prisma
 const adapter = new PrismaPg({connectionString:process.env.POSTGRESDB_URI});
