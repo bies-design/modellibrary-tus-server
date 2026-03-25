@@ -1,7 +1,7 @@
 #/bin/bash
 
 # ARGC
-if [ ! -z "${BRANCH}"]
+if [ ! -z "${BRANCH}"]; then
     ARGC="${BRANCH}"
 elif [ ! -z "$1" ]; then
     ARGC=$1

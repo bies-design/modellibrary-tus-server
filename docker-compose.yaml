@@ -6,7 +6,7 @@ services:
             dockerfile: ./Dockerfile
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
-        command: bash -c "booting tus-server_init.sh dev"
+        command: booting tus-server_init.sh dev
         # networks:
         #     modlib:
         #         aliases:
