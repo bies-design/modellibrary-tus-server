@@ -1,9 +1,12 @@
 services:
     tus-server-local:
         # container_name: tus-server-local
+        build: 
+            context: .
+            dockerfile: ./Dockerfile
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
-        command: bash -c "pwd && ls -l && cd app && ls -l && bash ./tus-server_init.sh dev"
+        command: bash -c "booting tus-server_init.sh dev"
         # networks:
         #     modlib:
         #         aliases:
@@ -17,7 +20,7 @@ services:
         # env_file:
         #     - ./.env
         volumes: 
-            - .:/usr/local/app
+            - ./:/usr/local/app
         logging:
             driver: "json-file"
             options:
