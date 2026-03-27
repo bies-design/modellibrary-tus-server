@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "update": "npm install && npm audit fix",
+    "update": "npm install --omit=dev --legacy-peer-deps && npm audit fix",
     "dev": "tsx watch server.ts",
     "create": "tsc",
     "prod": "node dist/server.js"

@@ -1,5 +1,9 @@
 # modellibrary-tus-server
 
+## Working ENV
+Nixpacks: v22.x <br/>
+NodeJS: v22.13.1 <br/>
+
 ## start by docker compose
 1. 創建.env，可以參考env.example
 2. 背景啟動
