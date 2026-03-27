@@ -2,7 +2,9 @@
 
 ## Working ENV
 Nixpacks: v22.x <br/>
-NodeJS: v22.13.1 <br/>
+NodeJS: v22.14.0 <br/>
+
+https://lazamar.co.uk/nix-versions/?package=nodejs&version=24.1.0&fullName=nodejs-24.1.0&keyName=nodejs_24&revision=e6f23dc08d3624daab7094b701aa3954923c6bbb&channel=nixpkgs-unstable
 
 ## start by docker compose
 1. 創建.env，可以參考env.example
