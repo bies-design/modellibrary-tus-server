@@ -59,11 +59,15 @@ const allowedOrigins = [
   `http://${process.env.TUS_SERVER_URL}:${PORT}`,     // 另一個前端
   `http://${process.env.TARGET_HOST}:${PORT}`,     // 從環境變數讀取的 TUS 網址
 ];
+// 初始化 Socket.io 並設定 Socket 關聯的 CORS Policy
 const io = new SocketServer(server, {
     cors: {
-        origin: "*", // 允許前端連線，先不放寬限制 *
-        methods: ["GET", "POST"]
-        // credentials: true       // OPTIONS: 如果你有用到 Cookie 或 Authorization Header 建議加上
+        // 🚀 關鍵 1：動態回傳前端的網域，這樣就能完美繞過 '*' 與 credentials 的衝突
+        origin: function (origin:any, callback:any) {
+            callback(null, true); 
+        },
+        methods: ["GET", "POST", "OPTIONS"],
+        credentials: true // 🚀 關鍵 2：HTTP Polling 跨網域必須開啟這個，才能認得 Session ID
     }
 });
 
