@@ -125,8 +125,8 @@ const redisConnection = new IORedis({
 // 初始化 QueueEvents 監聽器
 // 自動連上 Redis，並監聽所有動靜。
 // 名稱按照ENV 設置，tus-server 和 ifc-convert-frags-server 同步
-const ifcConversionQueue = String(process.env.IFC_CONVERSION_Q);
-const queueEvents = new QueueEvents(ifcConversionQueue || 'ifc-conversion-queue', { 
+const ifcConversionQueue = process.env.IFC_CONVERSION_Q || 'ifc-conversion-queue';
+const queueEvents = new QueueEvents(ifcConversionQueue , { 
     connection: redisConnection 
 });
 // 監聽「進度更新」事件
@@ -134,7 +134,7 @@ queueEvents.on('progress', ({ jobId, data }:{jobId:string, data:any}) => {
     // jobId: 我們剛剛強制設成了 fileKey (e.g., 'e97210...')
     // data: 就是 worker 裡回報的數字 (e.g., 45)
     
-    // console.log(`📊 [Redis] Job ${jobId} 進度: ${data}%`); // Debug 用
+    console.log(`📊 [Redis] Job ${jobId} 進度: ${data}%`); // Debug 用
 
     // 透過 Socket 廣播給前端
     io.emit('conversion-progress', {
