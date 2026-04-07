@@ -50,24 +50,36 @@ app.use(express.urlencoded({ extended: true }));
 const portStr: string = String(process.env.TUS_SERVER_PORT);
 const PORT = parseInt(portStr || "3003", 10); // 我們讓這個服務預設跑在 3003 port
 const HOST = "0.0.0.0"; // 這樣不管是 localhost 還是 Docker 內部網路都能連上，而且前端連線時用的還是 localhost:3003（因為我們在 docker-compose.yml 中做了 port mapping）
-const WORKER_WEBHOOK_URL = `http://${process.env.IFC_FRAGS_CONVERT_WORKER_WEBHOOK_URL}/webhook/convert` || 'http://localhost:3005/webhook/convert';
-const TUS_Server_URL = `${process.env.TUS_SERVER_HOST}:${PORT}`;
+const WORKER_WEBHOOK_URL = process.env.IFC_FRAGS_CONVERT_WORKER_WEBHOOK_URL 
+    ? `http://${process.env.IFC_FRAGS_CONVERT_WORKER_WEBHOOK_URL}/webhook/convert` 
+    : 'http://localhost:3005/webhook/convert';const TUS_Server_URL = `${process.env.TUS_SERVER_HOST}:${PORT}`;
 
-// 初始化 Socket.io 並設定 Socket 關聯的 CORS Policy
-const allowedOrigins = [
-  `http://${HOST}:${PORT}`,        // 前端開發網址
-  `http://${process.env.TUS_SERVER_URL}:${PORT}`,     // 另一個前端
-  `http://${process.env.TARGET_HOST}:${PORT}`,     // 從環境變數讀取的 TUS 網址
-];
-// 初始化 Socket.io 並設定 Socket 關聯的 CORS Policy
+// // 初始化 Socket.io 並設定 Socket 關聯的 CORS Policy
+// const allowedOrigins = [
+//   `http://${HOST}:${PORT}`,        // 前端開發網址
+//   `http://${process.env.TUS_SERVER_URL}:${PORT}`,     // 另一個前端
+//   `http://${process.env.TARGET_HOST}:${PORT}`,     // 從環境變數讀取的 TUS 網址
+// ];
+// 1. 從環境變數讀取字串，如果沒設定則給予預設值 (建議至少留個 localhost)
+const originsStr:string = process.env.ALLOWED_ORIGINS || 'https://modellibrary.bies-cloud.com';
+
+// 2. 將字串轉為陣列
+const allowedOrigins = originsStr.split(',').map(origin => origin.trim());
+
 const io = new SocketServer(server, {
     cors: {
-        // 🚀 關鍵 1：動態回傳前端的網域，這樣就能完美繞過 '*' 與 credentials 的衝突
         origin: function (origin:any, callback:any) {
-            callback(null, true); 
+            // 如果請求沒有 origin (例如伺服器對伺服器通訊或 Postman) 
+            // 或是 origin 在白名單內，就放行
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                console.warn(`🚫 [CORS] 拒絕來自非白名單的連線: ${origin}`);
+                callback(new Error('Not allowed by CORS'));
+            }
         },
         methods: ["GET", "POST", "OPTIONS"],
-        credentials: true // 🚀 關鍵 2：HTTP Polling 跨網域必須開啟這個，才能認得 Session ID
+        credentials: true
     }
 });
 
