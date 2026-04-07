@@ -77,7 +77,7 @@ io.on('connection', (socket:any) => {
 // 而是直接在 s3ClientConfig 物件中傳入 AWS 的設定參數，S3Store 內部會幫你建立 Client
 const S3_Endpoint_str = `http://${process.env.S3_HOST}:${process.env.S3_PORT}`;  // 需要加上 http:// 避免host&port 在S3Store 類別中錯誤使用
 const store = new S3Store({
-    partSize: 5 * 1024 * 1024, // 設定每個分片 5MB (保護上傳記憶體穩定)
+    partSize: 10 * 1024 * 1024, // 設定每個分片 10MB (保護上傳記憶體穩定)
     s3ClientConfig:{
         bucket: process.env.S3_IFC_BUCKET!,
         region: process.env.S3_REGION,
