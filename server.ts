@@ -219,7 +219,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
 
 app.get('/health', (req: any, res: any) => {
     const path = req.url || "none"; // 例如 "/api/hello?name=next"
-    console.info(`[Tus] Receive health check ... ${path}`);
+    // console.info(`[Tus] Receive health check ... ${path}`);
     res.json({
         success: true,
         message: "OK",
