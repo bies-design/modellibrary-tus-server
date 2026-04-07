@@ -201,6 +201,16 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
     }
 });
 
+app.get(/health/, (req: any, res: any) => {
+    const path = req.url || "none"; // 例如 "/api/hello?name=next"
+    console.info(`[Tus] Receive health check ... ${path}`);
+    res.json({
+        success: true,
+        message: "OK",
+        timestamp: new Date().toISOString()
+    });
+});
+
 // 掛載上傳路由
 // 注意：Tus 需要處理 HEAD, PATCH, POST 等請求，所以用 app.all
 // 處理 "建立上傳" (POST /files)
