@@ -95,7 +95,7 @@ const S3_Endpoint_str = `http://${process.env.S3_HOST}:${process.env.S3_PORT}`; 
 const store = new S3Store({
     partSize: 10 * 1024 * 1024, // 設定每個分片 10MB (保護上傳記憶體穩定)
     s3ClientConfig:{
-        bucket: process.env.S3_IFC_BUCKET!,
+        bucket: process.env.S3_UPLOADASSETS_BUCKET!,
         region: process.env.S3_REGION,
         endpoint: S3_Endpoint_str ,
         credentials: {
@@ -170,49 +170,80 @@ app.post('/notify/done', (req:any, res:any)=> {
 
     res.json({ received: true });
 });
-
+// 判斷是否要轉檔
+const getFileCategory = (fileName) => {
+    const ext = fileName.toLowerCase().split('.').pop();
+    if (['ifc', '3dm', 'obj', 'fbx', 'gltf'].includes(ext)) return 'MODEL_3D';
+    if (['dwg', 'dxf'].includes(ext)) return 'DRAWING';
+    if (['pdf', 'docx', 'xlsx', 'txt'].includes(ext)) return 'DOCUMENT';
+    if (['jpg', 'png', 'webp', 'jpeg'].includes(ext)) return 'IMAGE';
+    return 'OTHER';
+};
 // 監聽「上傳完成」事件
 tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
     const fileId = upload.id;
     // 取得檔名 (Uppy 預設會把檔名放在 metadata.filename)
     const fileName = upload.metadata?.filename;
-
     const userId = upload.metadata?.userid;
+
     console.log("DEBUG: metadata received:", upload.metadata);
 
     if (fileName) {
         console.log(`✅ [Tus] 上傳成功: ${fileName}(ID: ${fileId})`);
         
-        // 只有 IFC 檔案才通知 Worker
-        if (fileName.toLowerCase().endsWith('.ifc')) {
-            console.log(`📞 [Tus] 正在通知 Worker 處理: ${fileName}...`);
-            
-            try{
-                const newModel = await prisma.model.create({
-                    data:{
-                        shortId: nanoid(10),
-                        name: fileName,
-                        fileId: fileId,
-                        status:'processing',
-                        ...(userId && {// 連結到使用者 (如果 userId 存在)
-                            uploader:{
-                                connect:{ id:userId }
-                            }
-                        })
-                    }
-                });
-                console.log(`📝 [DB] 模型已建立: ${newModel.name} (DB_ID: ${newModel.id})`);
+        const category = getFileCategory(fileName);
+        const extension = `.${fileName.toLowerCase().split('.').pop()}`;
+        
+        try{
+            // 只有 IFC 需要設為 processing
+            const isIfc = extension === '.ifc';
 
+            // const newModel = await prisma.model.create({
+            //     data:{
+            //         shortId: nanoid(10),
+            //         name: fileName,
+            //         fileId: fileId,
+            //         status:'processing',
+            //         ...(userId && {// 連結到使用者 (如果 userId 存在)
+            //             uploader:{
+            //                 connect:{ id:userId }
+            //             }
+            //         })
+            //     }
+            // });
+            const newFile = await prisma.fileRecord.create({
+                data: {
+                    name: fileName,
+                    fileId: fileId,
+                    category: category,
+                    extension: extension,
+                    size: upload.size ? upload.size.toString() : "0",
+                    // IFC 進入加工狀態，其餘檔案直接「已完成」
+                    status: isIfc ? 'processing' : 'completed',
+                    uploader: { connect: { id: userId } }
+                }
+            })
+            console.log(`📦 [Tus] 簽收: ${fileName} (${category}) -> ${isIfc ? '送往加工廠' : '直接入庫'}`);
+            
+            if(isIfc){
+                console.log(`📞 [Tus] 正在通知 Worker 處理: ${fileName}...`);
                 axios.post(WORKER_WEBHOOK_URL, {
                     fileKey:fileId,
                     fileName:fileName,
-                    dbId: newModel.id
+                    dbId: newFile.id
                 });
                 console.log(`📨 [Tus] 通知 Worker 成功！`);
-            }catch(err: any){
-                if(err) console.error(`❌ [Tus] DB 寫入或通知失敗:`, err.message);
-                
+            } else {
+                // 非 IFC 檔案直接透過 Socket 告訴前端「傳好了」
+                // 這樣前端的進度條會立刻變色完成
+                io.emit('conversion-complete', {
+                    fileName: fileName,
+                    fileId: fileId,
+                    status: 'success'
+                });
             }
+        }catch(err: any){
+            if(err) console.error(`❌ [Tus] DB 寫入或通知失敗:`, err.message);
         }
     }
 });
@@ -265,7 +296,7 @@ app.all(/(.*)/, (req, res) => {
 server.listen(PORT, HOST, () => {
     console.log(`--------------------------------------------------`);
     console.log(`📂 Connecting to MinIO at: ${process.env.S3_ENDPOINT}`);
-    console.log(`📦 Target Bucket: ${process.env.S3_IFC_BUCKET }`);
+    console.log(`📦 Target Bucket: ${process.env.S3_UPLOADASSETS_BUCKET }`);
     console.log(`🔗 Worker Webhook Target: ${WORKER_WEBHOOK_URL}`);
     console.log(`🚀 Tus Server + Socket running on http://localhost:${PORT}`);
     console.log(`--------------------------------------------------`);
