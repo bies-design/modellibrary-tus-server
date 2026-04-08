@@ -171,8 +171,8 @@ app.post('/notify/done', (req:any, res:any)=> {
     res.json({ received: true });
 });
 // 判斷是否要轉檔
-const getFileCategory = (fileName) => {
-    const ext = fileName.toLowerCase().split('.').pop();
+const getFileCategory = (fileName:string) => {
+    const ext = fileName.toLowerCase().split('.').pop()!;
     if (['ifc', '3dm', 'obj', 'fbx', 'gltf'].includes(ext)) return 'MODEL_3D';
     if (['dwg', 'dxf'].includes(ext)) return 'DRAWING';
     if (['pdf', 'docx', 'xlsx', 'txt'].includes(ext)) return 'DOCUMENT';
