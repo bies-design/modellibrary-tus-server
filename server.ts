@@ -123,7 +123,7 @@ const tusServer = new Server({
             
             // 替換掉可能造成 URL 路徑解析錯誤的特殊字元 (例如空白換成底線)
             const safeName = originalName.replace(/[^a-zA-Z0-9.\-_]/g, '_'); 
-            return `${id}/${safeName}`;
+            return `${id}+${safeName}`;
         }
 
         return id;
