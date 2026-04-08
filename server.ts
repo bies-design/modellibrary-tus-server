@@ -111,6 +111,23 @@ const tusServer = new Server({
     path: '/files',
     datastore: store,
     respectForwardedHeaders: true,
+    // 命名函式
+    namingFunction: (req, metadata) => {
+        const id = nanoid(10);
+        const originalName = metadata?.fileName;
+
+        if(originalName){
+            // 為了避免中文或特殊符號讓 MinIO 儲存時產生編碼問題，可以做個簡單的編碼
+            // 或是你也可以選擇只抓副檔名。這裡我們採用「隨機碼_原始檔名」的格式
+            // 存進 MinIO 就會變成類似：V1StGXR8_z_my_building.ifc
+            
+            // 替換掉可能造成 URL 路徑解析錯誤的特殊字元 (例如空白換成底線)
+            const safeName = originalName.replace(/[^a-zA-Z0-9.\-_]/g, '_'); 
+            return `${id}_${safeName}`;
+        }
+
+        return id;
+    }
 });
 // Redis 連線 (給 QueueEvents 用)
 const redisEndpoint: string = String(process.env.REDIS_HOST || 'localhost');
@@ -170,28 +187,20 @@ app.post('/notify/done', (req:any, res:any)=> {
 
     res.json({ received: true });
 });
-// 判斷是否要轉檔
-const getFileCategory = (fileName:string) => {
-    const ext = fileName.toLowerCase().split('.').pop()!;
-    if (['ifc', '3dm', 'obj', 'fbx', 'gltf'].includes(ext)) return 'MODEL_3D';
-    if (['dwg', 'dxf'].includes(ext)) return 'DRAWING';
-    if (['pdf', 'docx', 'xlsx', 'txt'].includes(ext)) return 'DOCUMENT';
-    if (['jpg', 'png', 'webp', 'jpeg'].includes(ext)) return 'IMAGE';
-    return 'OTHER';
-};
+
 // 監聽「上傳完成」事件
 tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
     const fileId = upload.id;
     // 取得檔名 (Uppy 預設會把檔名放在 metadata.filename)
     const fileName = upload.metadata?.filename;
     const userId = upload.metadata?.userid;
+    const userCategory = upload.metadata?.category;
 
     console.log("DEBUG: metadata received:", upload.metadata);
 
     if (fileName) {
         console.log(`✅ [Tus] 上傳成功: ${fileName}(ID: ${fileId})`);
         
-        const category = getFileCategory(fileName);
         const extension = `.${fileName.toLowerCase().split('.').pop()}`;
         
         try{
@@ -215,7 +224,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
                 data: {
                     name: fileName,
                     fileId: fileId,
-                    category: category,
+                    category: userCategory,
                     extension: extension,
                     size: upload.size ? upload.size.toString() : "0",
                     // IFC 進入加工狀態，其餘檔案直接「已完成」
@@ -223,7 +232,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
                     uploader: { connect: { id: userId } }
                 }
             })
-            console.log(`📦 [Tus] 簽收: ${fileName} (${category}) -> ${isIfc ? '送往加工廠' : '直接入庫'}`);
+            console.log(`📦 [Tus] 簽收: ${fileName} (${userCategory}) -> ${isIfc ? '送往加工廠' : '直接入庫'}`);
             
             if(isIfc){
                 console.log(`📞 [Tus] 正在通知 Worker 處理: ${fileName}...`);
