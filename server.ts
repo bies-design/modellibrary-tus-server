@@ -113,8 +113,8 @@ const tusServer = new Server({
     respectForwardedHeaders: true,
     // 命名函式
     namingFunction: (req, metadata) => {
-        const id = nanoid(10);
-        const originalName = metadata?.fileName;
+        const id = nanoid(12);
+        const originalName = metadata?.name;
 
         if(originalName){
             // 為了避免中文或特殊符號讓 MinIO 儲存時產生編碼問題，可以做個簡單的編碼
@@ -123,7 +123,7 @@ const tusServer = new Server({
             
             // 替換掉可能造成 URL 路徑解析錯誤的特殊字元 (例如空白換成底線)
             const safeName = originalName.replace(/[^a-zA-Z0-9.\-_]/g, '_'); 
-            return `${id}_${safeName}`;
+            return `${id}/${safeName}`;
         }
 
         return id;
