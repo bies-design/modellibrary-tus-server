@@ -14,6 +14,8 @@ import {nanoid} from 'nanoid';
 import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
+// 目前tus上task對照表 提供哪一個task屬於哪user的對照功能
+const activeTasksMap = new Map();
 const result = dotenv.config({ path: path.resolve(process.cwd(), '.env') });  // 用 process.cwd() 代替 __dirname
 if (result.error){
     console.warn("Warning: [!] 沒有實體 .env 檔案，將嘗試從環境變數讀取。");
@@ -85,7 +87,14 @@ const io = new SocketServer(server, {
 
 // 監聽 Socket 連線 (Debug 用)
 io.on('connection', (socket:any) => {
-    console.log(`🔌 [Socket] 前端已連線: ${socket.id}`);
+    const userId = socket.handshake.query.userId;
+
+    if(userId) {
+        socket.join(userId); //加入專屬房間
+        console.log(`🔌 [Socket] 使用者 ${userId} 已連線並加入房間`);
+    }else {
+        console.log(`🔌 [Socket] 未登入使用者連線: ${socket.id}`);
+    }
 });
 
 // 設定 Tus 儲存方式 (存到 MinIO)
@@ -148,16 +157,20 @@ const queueEvents = new QueueEvents(ifcConversionQueue , {
 });
 // 監聽「進度更新」事件
 queueEvents.on('progress', ({ jobId, data }:{jobId:string, data:any}) => {
-    // jobId: 我們剛剛強制設成了 fileKey (e.g., 'e97210...')
-    // data: 就是 worker 裡回報的數字 (e.g., 45)
-    
-    console.log(`📊 [Redis] Job ${jobId} 進度: ${data}%`); // Debug 用
+    const userId = activeTasksMap.get(jobId);
 
-    // 透過 Socket 廣播給前端
-    io.emit('conversion-progress', {
-        fileId: jobId, // 這裡就是 fileKey
-        progress: data
-    });
+    if(userId){
+        io.to(userId).emit('conversion-progress' , {
+            fileId: jobId,
+            progress: data
+        });
+        console.log(`📊 [Redis] Job: ${jobId} user: ${userId} 進度: ${data}%`); // Debug 用
+    } else{
+        // 💡 優化：如果查無 userId (可能伺服器剛重啟)，啟動 Fallback 全頻廣播
+        // 反正前端有防呆，不會互相干擾
+        io.emit('conversion-progress', { fileId: jobId, progress: data });
+        console.log(`📊 [Redis] Job: ${jobId} 找不到Uesr: ${userId} 進度: ${data}% 不廣播!!s`);
+    }
 });
 // 先定義 API 路由 (給 Worker 用的)
 // 這樣可以確保 Tus 的 handle 不會對這個請求造成任何干擾
@@ -170,20 +183,32 @@ app.post('/notify/done', (req:any, res:any)=> {
         console.error("❌ [Error] req.body is undefined!");
         return res.status(400).json({ error: "No body received" });
     }
-    const {  fileKey, fileName, status, message, size } = req.body;
+    const {  fileKey, fileName, status, message, size, userId } = req.body;
     
+    const payload = {
+        fileName,
+        fileId: fileKey, 
+        status, 
+        message, 
+        size,
+        fragUrl: `/viewer-assets/${fileKey}`,
+        ifcUrl: `/uploadassets/${fileKey}`
+    };
+
     console.log(`📣 [Tus] 收到 Worker 完成通知: ${fileName} (${status})`);
 
     // 透過 WebSocket 通知前端
-    io.emit('conversion-complete', {
-        fileName:fileName,
-        fileId: fileKey,
-        status: status, // 'success' or 'error'
-        message: message,
-        fragUrl: `/frags/${fileKey}.frag`,// 假設你有對應的下載路由
-        ifcUrl: `/ifcfiles/${fileKey}`,
-        size: size
-    });
+    if (userId) {
+        io.to(userId).emit('conversion-complete', payload);
+        console.log(`User: ${userId} 的任務完成 釋放任務tus任務佇列`);
+    } else {
+        // 💡 優化：就算沒有 userId，也全頻廣播，確保上傳者一定能收到通知
+        io.emit('conversion-complete', payload);
+        console.log(`[Fallback] 找不到該任務的user,使用全頻廣播通知`);
+    }
+
+    // 清理佇列 不管有沒有通知成功
+    activeTasksMap.delete(fileKey);
 
     res.json({ received: true });
 });
@@ -196,6 +221,11 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
     const userId = upload.metadata?.userid;
     const userCategory = upload.metadata?.category;
 
+    // 將task歸納到他屬於的userId內
+    if(userId) {
+        activeTasksMap.set(fileId, userId);
+    }
+
     console.log("DEBUG: metadata received:", upload.metadata);
 
     if (fileName) {
@@ -207,19 +237,6 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
             // 只有 IFC 需要設為 processing
             const isIfc = extension === '.ifc';
 
-            // const newModel = await prisma.model.create({
-            //     data:{
-            //         shortId: nanoid(10),
-            //         name: fileName,
-            //         fileId: fileId,
-            //         status:'processing',
-            //         ...(userId && {// 連結到使用者 (如果 userId 存在)
-            //             uploader:{
-            //                 connect:{ id:userId }
-            //             }
-            //         })
-            //     }
-            // });
             const newFile = await prisma.fileRecord.create({
                 data: {
                     name: fileName,
@@ -239,7 +256,8 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
                 axios.post(WORKER_WEBHOOK_URL, {
                     fileKey:fileId,
                     fileName:fileName,
-                    dbId: newFile.id
+                    dbId: newFile.id,
+                    userId: userId
                 });
                 console.log(`📨 [Tus] 通知 Worker 成功！`);
             } else {
