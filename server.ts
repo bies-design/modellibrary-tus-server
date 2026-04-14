@@ -8,7 +8,7 @@ import { S3Store } from '@tus/s3-store';
 import axios from 'axios';
 import http from 'http';
 import { Server as SocketServer } from 'socket.io';
-import { QueueEvents } from 'bullmq'; 
+import { QueueEvents, Queue } from 'bullmq'; 
 import IORedis from 'ioredis';
 import {nanoid} from 'nanoid';
 import { PrismaClient } from './prisma/generated/prisma/client';
@@ -155,6 +155,11 @@ const ifcConversionQueue = process.env.IFC_CONVERSION_Q || 'ifc-conversion-queue
 const queueEvents = new QueueEvents(ifcConversionQueue , { 
     connection: redisConnection 
 });
+// 建立 Queue 實例，讓我們可以操作與查詢 Redis 裡的任務
+const conversionQueue = new Queue(ifcConversionQueue, { 
+    connection: redisConnection 
+});
+
 // 監聽「進度更新」事件
 queueEvents.on('progress', ({ jobId, data }:{jobId:string, data:any}) => {
     const userId = activeTasksMap.get(jobId);
@@ -283,6 +288,40 @@ app.get('/health', (req: any, res: any) => {
         message: "OK",
         timestamp: new Date().toISOString()
     });
+});
+
+app.get('/api/tasks/status', async (req, res) => {
+    const userId = req.query.userId;
+    // 或是用 fileId: const fileId = req.query.fileId;
+
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+
+    try {
+        // 1. 去資料庫查詢該使用者「正在處理中」或「發生錯誤」的任務
+        const activeTasks = await prisma.fileRecord.findMany({
+            where: {
+                uploaderId: userId as string,
+                status: { in: ['processing'] }
+            }
+        });
+
+        // 2. 去 Redis (BullMQ) 查目前的精準 % 數
+        const tasksWithProgress = await Promise.all(activeTasks.map(async (task) => {
+            // 用 task.fileId (也就是我們的 jobId) 去 Redis 抓取該任務的詳細資訊
+            const job = await conversionQueue.getJob(task.fileId);
+            
+            return {
+                ...task,
+                // 如果任務還在 Redis 裡，就抓出當前進度；如果不在了，就給 0
+                progress: job ? job.progress : 0 
+            };
+        }));
+
+        res.json({ success: true, data: tasksWithProgress });
+    } catch (error) {
+        console.error("Fetch status error:", error);
+        res.status(500).json({ error: "Failed to fetch task status" });
+    }
 });
 
 // 掛載上傳路由
