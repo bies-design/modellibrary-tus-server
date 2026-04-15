@@ -421,8 +421,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 7.5.0
-   * Query Engine version: 280c870be64f457428992c43c1f6d557fab6e29e
+   * Prisma Client JS version: 7.7.0
+   * Query Engine version: 75cbdc1eb7150937890ad5465d861175c6624711
    */
   export type PrismaVersion = {
     client: string
@@ -1956,12 +1956,14 @@ export namespace Prisma {
   export type TeamCountOutputType = {
     members: number
     posts: number
+    files: number
     projects: number
   }
 
   export type TeamCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     members?: boolean | TeamCountOutputTypeCountMembersArgs
     posts?: boolean | TeamCountOutputTypeCountPostsArgs
+    files?: boolean | TeamCountOutputTypeCountFilesArgs
     projects?: boolean | TeamCountOutputTypeCountProjectsArgs
   }
 
@@ -1988,6 +1990,13 @@ export namespace Prisma {
    */
   export type TeamCountOutputTypeCountPostsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PostWhereInput
+  }
+
+  /**
+   * TeamCountOutputType without action
+   */
+  export type TeamCountOutputTypeCountFilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FileRecordWhereInput
   }
 
   /**
@@ -4342,6 +4351,7 @@ export namespace Prisma {
     size: string | null
     status: $Enums.ProcessStatus | null
     errorMessage: string | null
+    teamId: string | null
     uploaderId: string | null
     postId: string | null
     createdAt: Date | null
@@ -4359,6 +4369,7 @@ export namespace Prisma {
     size: string | null
     status: $Enums.ProcessStatus | null
     errorMessage: string | null
+    teamId: string | null
     uploaderId: string | null
     postId: string | null
     createdAt: Date | null
@@ -4376,6 +4387,7 @@ export namespace Prisma {
     size: number
     status: number
     errorMessage: number
+    teamId: number
     uploaderId: number
     postId: number
     createdAt: number
@@ -4395,6 +4407,7 @@ export namespace Prisma {
     size?: true
     status?: true
     errorMessage?: true
+    teamId?: true
     uploaderId?: true
     postId?: true
     createdAt?: true
@@ -4412,6 +4425,7 @@ export namespace Prisma {
     size?: true
     status?: true
     errorMessage?: true
+    teamId?: true
     uploaderId?: true
     postId?: true
     createdAt?: true
@@ -4429,6 +4443,7 @@ export namespace Prisma {
     size?: true
     status?: true
     errorMessage?: true
+    teamId?: true
     uploaderId?: true
     postId?: true
     createdAt?: true
@@ -4519,6 +4534,7 @@ export namespace Prisma {
     size: string
     status: $Enums.ProcessStatus
     errorMessage: string | null
+    teamId: string | null
     uploaderId: string
     postId: string | null
     createdAt: Date
@@ -4553,10 +4569,12 @@ export namespace Prisma {
     size?: boolean
     status?: boolean
     errorMessage?: boolean
+    teamId?: boolean
     uploaderId?: boolean
     postId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    team?: boolean | FileRecord$teamArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
     post?: boolean | FileRecord$postArgs<ExtArgs>
   }, ExtArgs["result"]["fileRecord"]>
@@ -4572,10 +4590,12 @@ export namespace Prisma {
     size?: boolean
     status?: boolean
     errorMessage?: boolean
+    teamId?: boolean
     uploaderId?: boolean
     postId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    team?: boolean | FileRecord$teamArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
     post?: boolean | FileRecord$postArgs<ExtArgs>
   }, ExtArgs["result"]["fileRecord"]>
@@ -4591,10 +4611,12 @@ export namespace Prisma {
     size?: boolean
     status?: boolean
     errorMessage?: boolean
+    teamId?: boolean
     uploaderId?: boolean
     postId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    team?: boolean | FileRecord$teamArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
     post?: boolean | FileRecord$postArgs<ExtArgs>
   }, ExtArgs["result"]["fileRecord"]>
@@ -4610,22 +4632,26 @@ export namespace Prisma {
     size?: boolean
     status?: boolean
     errorMessage?: boolean
+    teamId?: boolean
     uploaderId?: boolean
     postId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FileRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shortId" | "name" | "fileId" | "viewerFileId" | "category" | "extension" | "size" | "status" | "errorMessage" | "uploaderId" | "postId" | "createdAt" | "updatedAt", ExtArgs["result"]["fileRecord"]>
+  export type FileRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shortId" | "name" | "fileId" | "viewerFileId" | "category" | "extension" | "size" | "status" | "errorMessage" | "teamId" | "uploaderId" | "postId" | "createdAt" | "updatedAt", ExtArgs["result"]["fileRecord"]>
   export type FileRecordInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | FileRecord$teamArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
     post?: boolean | FileRecord$postArgs<ExtArgs>
   }
   export type FileRecordIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | FileRecord$teamArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
     post?: boolean | FileRecord$postArgs<ExtArgs>
   }
   export type FileRecordIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    team?: boolean | FileRecord$teamArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
     post?: boolean | FileRecord$postArgs<ExtArgs>
   }
@@ -4633,6 +4659,7 @@ export namespace Prisma {
   export type $FileRecordPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FileRecord"
     objects: {
+      team: Prisma.$TeamPayload<ExtArgs> | null
       uploader: Prisma.$UserPayload<ExtArgs>
       post: Prisma.$PostPayload<ExtArgs> | null
     }
@@ -4647,6 +4674,7 @@ export namespace Prisma {
       size: string
       status: $Enums.ProcessStatus
       errorMessage: string | null
+      teamId: string | null
       uploaderId: string
       postId: string | null
       createdAt: Date
@@ -5045,6 +5073,7 @@ export namespace Prisma {
    */
   export interface Prisma__FileRecordClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    team<T extends FileRecord$teamArgs<ExtArgs> = {}>(args?: Subset<T, FileRecord$teamArgs<ExtArgs>>): Prisma__TeamClient<$Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     uploader<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     post<T extends FileRecord$postArgs<ExtArgs> = {}>(args?: Subset<T, FileRecord$postArgs<ExtArgs>>): Prisma__PostClient<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
@@ -5086,6 +5115,7 @@ export namespace Prisma {
     readonly size: FieldRef<"FileRecord", 'String'>
     readonly status: FieldRef<"FileRecord", 'ProcessStatus'>
     readonly errorMessage: FieldRef<"FileRecord", 'String'>
+    readonly teamId: FieldRef<"FileRecord", 'String'>
     readonly uploaderId: FieldRef<"FileRecord", 'String'>
     readonly postId: FieldRef<"FileRecord", 'String'>
     readonly createdAt: FieldRef<"FileRecord", 'DateTime'>
@@ -5488,6 +5518,25 @@ export namespace Prisma {
      * Limit how many FileRecords to delete.
      */
     limit?: number
+  }
+
+  /**
+   * FileRecord.team
+   */
+  export type FileRecord$teamArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Team
+     */
+    select?: TeamSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Team
+     */
+    omit?: TeamOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TeamInclude<ExtArgs> | null
+    where?: TeamWhereInput
   }
 
   /**
@@ -10650,6 +10699,7 @@ export namespace Prisma {
     updatedAt?: boolean
     members?: boolean | Team$membersArgs<ExtArgs>
     posts?: boolean | Team$postsArgs<ExtArgs>
+    files?: boolean | Team$filesArgs<ExtArgs>
     projects?: boolean | Team$projectsArgs<ExtArgs>
     _count?: boolean | TeamCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["team"]>
@@ -10688,6 +10738,7 @@ export namespace Prisma {
   export type TeamInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     members?: boolean | Team$membersArgs<ExtArgs>
     posts?: boolean | Team$postsArgs<ExtArgs>
+    files?: boolean | Team$filesArgs<ExtArgs>
     projects?: boolean | Team$projectsArgs<ExtArgs>
     _count?: boolean | TeamCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -10699,6 +10750,7 @@ export namespace Prisma {
     objects: {
       members: Prisma.$TeamMemberPayload<ExtArgs>[]
       posts: Prisma.$PostPayload<ExtArgs>[]
+      files: Prisma.$FileRecordPayload<ExtArgs>[]
       projects: Prisma.$ProjectPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -11105,6 +11157,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     members<T extends Team$membersArgs<ExtArgs> = {}>(args?: Subset<T, Team$membersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     posts<T extends Team$postsArgs<ExtArgs> = {}>(args?: Subset<T, Team$postsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    files<T extends Team$filesArgs<ExtArgs> = {}>(args?: Subset<T, Team$filesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FileRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     projects<T extends Team$projectsArgs<ExtArgs> = {}>(args?: Subset<T, Team$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -11580,6 +11633,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PostScalarFieldEnum | PostScalarFieldEnum[]
+  }
+
+  /**
+   * Team.files
+   */
+  export type Team$filesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FileRecord
+     */
+    select?: FileRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FileRecord
+     */
+    omit?: FileRecordOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FileRecordInclude<ExtArgs> | null
+    where?: FileRecordWhereInput
+    orderBy?: FileRecordOrderByWithRelationInput | FileRecordOrderByWithRelationInput[]
+    cursor?: FileRecordWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FileRecordScalarFieldEnum | FileRecordScalarFieldEnum[]
   }
 
   /**
@@ -13997,6 +14074,7 @@ export namespace Prisma {
     size: 'size',
     status: 'status',
     errorMessage: 'errorMessage',
+    teamId: 'teamId',
     uploaderId: 'uploaderId',
     postId: 'postId',
     createdAt: 'createdAt',
@@ -14438,10 +14516,12 @@ export namespace Prisma {
     size?: StringFilter<"FileRecord"> | string
     status?: EnumProcessStatusFilter<"FileRecord"> | $Enums.ProcessStatus
     errorMessage?: StringNullableFilter<"FileRecord"> | string | null
+    teamId?: StringNullableFilter<"FileRecord"> | string | null
     uploaderId?: StringFilter<"FileRecord"> | string
     postId?: StringNullableFilter<"FileRecord"> | string | null
     createdAt?: DateTimeFilter<"FileRecord"> | Date | string
     updatedAt?: DateTimeFilter<"FileRecord"> | Date | string
+    team?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
     uploader?: XOR<UserScalarRelationFilter, UserWhereInput>
     post?: XOR<PostNullableScalarRelationFilter, PostWhereInput> | null
   }
@@ -14457,10 +14537,12 @@ export namespace Prisma {
     size?: SortOrder
     status?: SortOrder
     errorMessage?: SortOrderInput | SortOrder
+    teamId?: SortOrderInput | SortOrder
     uploaderId?: SortOrder
     postId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    team?: TeamOrderByWithRelationInput
     uploader?: UserOrderByWithRelationInput
     post?: PostOrderByWithRelationInput
   }
@@ -14479,10 +14561,12 @@ export namespace Prisma {
     size?: StringFilter<"FileRecord"> | string
     status?: EnumProcessStatusFilter<"FileRecord"> | $Enums.ProcessStatus
     errorMessage?: StringNullableFilter<"FileRecord"> | string | null
+    teamId?: StringNullableFilter<"FileRecord"> | string | null
     uploaderId?: StringFilter<"FileRecord"> | string
     postId?: StringNullableFilter<"FileRecord"> | string | null
     createdAt?: DateTimeFilter<"FileRecord"> | Date | string
     updatedAt?: DateTimeFilter<"FileRecord"> | Date | string
+    team?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
     uploader?: XOR<UserScalarRelationFilter, UserWhereInput>
     post?: XOR<PostNullableScalarRelationFilter, PostWhereInput> | null
   }, "id" | "shortId" | "fileId">
@@ -14498,6 +14582,7 @@ export namespace Prisma {
     size?: SortOrder
     status?: SortOrder
     errorMessage?: SortOrderInput | SortOrder
+    teamId?: SortOrderInput | SortOrder
     uploaderId?: SortOrder
     postId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -14521,6 +14606,7 @@ export namespace Prisma {
     size?: StringWithAggregatesFilter<"FileRecord"> | string
     status?: EnumProcessStatusWithAggregatesFilter<"FileRecord"> | $Enums.ProcessStatus
     errorMessage?: StringNullableWithAggregatesFilter<"FileRecord"> | string | null
+    teamId?: StringNullableWithAggregatesFilter<"FileRecord"> | string | null
     uploaderId?: StringWithAggregatesFilter<"FileRecord"> | string
     postId?: StringNullableWithAggregatesFilter<"FileRecord"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FileRecord"> | Date | string
@@ -14920,6 +15006,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Team"> | Date | string
     members?: TeamMemberListRelationFilter
     posts?: PostListRelationFilter
+    files?: FileRecordListRelationFilter
     projects?: ProjectListRelationFilter
   }
 
@@ -14933,6 +15020,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     members?: TeamMemberOrderByRelationAggregateInput
     posts?: PostOrderByRelationAggregateInput
+    files?: FileRecordOrderByRelationAggregateInput
     projects?: ProjectOrderByRelationAggregateInput
   }
 
@@ -14949,6 +15037,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Team"> | Date | string
     members?: TeamMemberListRelationFilter
     posts?: PostListRelationFilter
+    files?: FileRecordListRelationFilter
     projects?: ProjectListRelationFilter
   }, "id">
 
@@ -15275,6 +15364,7 @@ export namespace Prisma {
     errorMessage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    team?: TeamCreateNestedOneWithoutFilesInput
     uploader: UserCreateNestedOneWithoutFileRecordsInput
     post?: PostCreateNestedOneWithoutFilesInput
   }
@@ -15290,6 +15380,7 @@ export namespace Prisma {
     size?: string
     status?: $Enums.ProcessStatus
     errorMessage?: string | null
+    teamId?: string | null
     uploaderId: string
     postId?: string | null
     createdAt?: Date | string
@@ -15309,6 +15400,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: TeamUpdateOneWithoutFilesNestedInput
     uploader?: UserUpdateOneRequiredWithoutFileRecordsNestedInput
     post?: PostUpdateOneWithoutFilesNestedInput
   }
@@ -15324,6 +15416,7 @@ export namespace Prisma {
     size?: StringFieldUpdateOperationsInput | string
     status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     uploaderId?: StringFieldUpdateOperationsInput | string
     postId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15341,6 +15434,7 @@ export namespace Prisma {
     size?: string
     status?: $Enums.ProcessStatus
     errorMessage?: string | null
+    teamId?: string | null
     uploaderId: string
     postId?: string | null
     createdAt?: Date | string
@@ -15373,6 +15467,7 @@ export namespace Prisma {
     size?: StringFieldUpdateOperationsInput | string
     status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     uploaderId?: StringFieldUpdateOperationsInput | string
     postId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15800,6 +15895,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     members?: TeamMemberCreateNestedManyWithoutTeamInput
     posts?: PostCreateNestedManyWithoutTeamInput
+    files?: FileRecordCreateNestedManyWithoutTeamInput
     projects?: ProjectCreateNestedManyWithoutTeamInput
   }
 
@@ -15813,6 +15909,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
     posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+    files?: FileRecordUncheckedCreateNestedManyWithoutTeamInput
     projects?: ProjectUncheckedCreateNestedManyWithoutTeamInput
   }
 
@@ -15826,6 +15923,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: TeamMemberUpdateManyWithoutTeamNestedInput
     posts?: PostUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUpdateManyWithoutTeamNestedInput
     projects?: ProjectUpdateManyWithoutTeamNestedInput
   }
 
@@ -15839,6 +15937,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
     posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUncheckedUpdateManyWithoutTeamNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutTeamNestedInput
   }
 
@@ -16227,6 +16326,11 @@ export namespace Prisma {
     not?: NestedEnumProcessStatusFilter<$PrismaModel> | $Enums.ProcessStatus
   }
 
+  export type TeamNullableScalarRelationFilter = {
+    is?: TeamWhereInput | null
+    isNot?: TeamWhereInput | null
+  }
+
   export type PostNullableScalarRelationFilter = {
     is?: PostWhereInput | null
     isNot?: PostWhereInput | null
@@ -16243,6 +16347,7 @@ export namespace Prisma {
     size?: SortOrder
     status?: SortOrder
     errorMessage?: SortOrder
+    teamId?: SortOrder
     uploaderId?: SortOrder
     postId?: SortOrder
     createdAt?: SortOrder
@@ -16260,6 +16365,7 @@ export namespace Prisma {
     size?: SortOrder
     status?: SortOrder
     errorMessage?: SortOrder
+    teamId?: SortOrder
     uploaderId?: SortOrder
     postId?: SortOrder
     createdAt?: SortOrder
@@ -16277,6 +16383,7 @@ export namespace Prisma {
     size?: SortOrder
     status?: SortOrder
     errorMessage?: SortOrder
+    teamId?: SortOrder
     uploaderId?: SortOrder
     postId?: SortOrder
     createdAt?: SortOrder
@@ -16392,11 +16499,6 @@ export namespace Prisma {
     every?: FileRecordWhereInput
     some?: FileRecordWhereInput
     none?: FileRecordWhereInput
-  }
-
-  export type TeamNullableScalarRelationFilter = {
-    is?: TeamWhereInput | null
-    isNot?: TeamWhereInput | null
   }
 
   export type FileRecordOrderByRelationAggregateInput = {
@@ -16881,6 +16983,12 @@ export namespace Prisma {
     deleteMany?: CommentScalarWhereInput | CommentScalarWhereInput[]
   }
 
+  export type TeamCreateNestedOneWithoutFilesInput = {
+    create?: XOR<TeamCreateWithoutFilesInput, TeamUncheckedCreateWithoutFilesInput>
+    connectOrCreate?: TeamCreateOrConnectWithoutFilesInput
+    connect?: TeamWhereUniqueInput
+  }
+
   export type UserCreateNestedOneWithoutFileRecordsInput = {
     create?: XOR<UserCreateWithoutFileRecordsInput, UserUncheckedCreateWithoutFileRecordsInput>
     connectOrCreate?: UserCreateOrConnectWithoutFileRecordsInput
@@ -16899,6 +17007,16 @@ export namespace Prisma {
 
   export type EnumProcessStatusFieldUpdateOperationsInput = {
     set?: $Enums.ProcessStatus
+  }
+
+  export type TeamUpdateOneWithoutFilesNestedInput = {
+    create?: XOR<TeamCreateWithoutFilesInput, TeamUncheckedCreateWithoutFilesInput>
+    connectOrCreate?: TeamCreateOrConnectWithoutFilesInput
+    upsert?: TeamUpsertWithoutFilesInput
+    disconnect?: TeamWhereInput | boolean
+    delete?: TeamWhereInput | boolean
+    connect?: TeamWhereUniqueInput
+    update?: XOR<XOR<TeamUpdateToOneWithWhereWithoutFilesInput, TeamUpdateWithoutFilesInput>, TeamUncheckedUpdateWithoutFilesInput>
   }
 
   export type UserUpdateOneRequiredWithoutFileRecordsNestedInput = {
@@ -17404,6 +17522,13 @@ export namespace Prisma {
     connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
   }
 
+  export type FileRecordCreateNestedManyWithoutTeamInput = {
+    create?: XOR<FileRecordCreateWithoutTeamInput, FileRecordUncheckedCreateWithoutTeamInput> | FileRecordCreateWithoutTeamInput[] | FileRecordUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: FileRecordCreateOrConnectWithoutTeamInput | FileRecordCreateOrConnectWithoutTeamInput[]
+    createMany?: FileRecordCreateManyTeamInputEnvelope
+    connect?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+  }
+
   export type ProjectCreateNestedManyWithoutTeamInput = {
     create?: XOR<ProjectCreateWithoutTeamInput, ProjectUncheckedCreateWithoutTeamInput> | ProjectCreateWithoutTeamInput[] | ProjectUncheckedCreateWithoutTeamInput[]
     connectOrCreate?: ProjectCreateOrConnectWithoutTeamInput | ProjectCreateOrConnectWithoutTeamInput[]
@@ -17423,6 +17548,13 @@ export namespace Prisma {
     connectOrCreate?: PostCreateOrConnectWithoutTeamInput | PostCreateOrConnectWithoutTeamInput[]
     createMany?: PostCreateManyTeamInputEnvelope
     connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
+  }
+
+  export type FileRecordUncheckedCreateNestedManyWithoutTeamInput = {
+    create?: XOR<FileRecordCreateWithoutTeamInput, FileRecordUncheckedCreateWithoutTeamInput> | FileRecordCreateWithoutTeamInput[] | FileRecordUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: FileRecordCreateOrConnectWithoutTeamInput | FileRecordCreateOrConnectWithoutTeamInput[]
+    createMany?: FileRecordCreateManyTeamInputEnvelope
+    connect?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
   }
 
   export type ProjectUncheckedCreateNestedManyWithoutTeamInput = {
@@ -17458,6 +17590,20 @@ export namespace Prisma {
     update?: PostUpdateWithWhereUniqueWithoutTeamInput | PostUpdateWithWhereUniqueWithoutTeamInput[]
     updateMany?: PostUpdateManyWithWhereWithoutTeamInput | PostUpdateManyWithWhereWithoutTeamInput[]
     deleteMany?: PostScalarWhereInput | PostScalarWhereInput[]
+  }
+
+  export type FileRecordUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<FileRecordCreateWithoutTeamInput, FileRecordUncheckedCreateWithoutTeamInput> | FileRecordCreateWithoutTeamInput[] | FileRecordUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: FileRecordCreateOrConnectWithoutTeamInput | FileRecordCreateOrConnectWithoutTeamInput[]
+    upsert?: FileRecordUpsertWithWhereUniqueWithoutTeamInput | FileRecordUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: FileRecordCreateManyTeamInputEnvelope
+    set?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    disconnect?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    delete?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    connect?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    update?: FileRecordUpdateWithWhereUniqueWithoutTeamInput | FileRecordUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: FileRecordUpdateManyWithWhereWithoutTeamInput | FileRecordUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: FileRecordScalarWhereInput | FileRecordScalarWhereInput[]
   }
 
   export type ProjectUpdateManyWithoutTeamNestedInput = {
@@ -17500,6 +17646,20 @@ export namespace Prisma {
     update?: PostUpdateWithWhereUniqueWithoutTeamInput | PostUpdateWithWhereUniqueWithoutTeamInput[]
     updateMany?: PostUpdateManyWithWhereWithoutTeamInput | PostUpdateManyWithWhereWithoutTeamInput[]
     deleteMany?: PostScalarWhereInput | PostScalarWhereInput[]
+  }
+
+  export type FileRecordUncheckedUpdateManyWithoutTeamNestedInput = {
+    create?: XOR<FileRecordCreateWithoutTeamInput, FileRecordUncheckedCreateWithoutTeamInput> | FileRecordCreateWithoutTeamInput[] | FileRecordUncheckedCreateWithoutTeamInput[]
+    connectOrCreate?: FileRecordCreateOrConnectWithoutTeamInput | FileRecordCreateOrConnectWithoutTeamInput[]
+    upsert?: FileRecordUpsertWithWhereUniqueWithoutTeamInput | FileRecordUpsertWithWhereUniqueWithoutTeamInput[]
+    createMany?: FileRecordCreateManyTeamInputEnvelope
+    set?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    disconnect?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    delete?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    connect?: FileRecordWhereUniqueInput | FileRecordWhereUniqueInput[]
+    update?: FileRecordUpdateWithWhereUniqueWithoutTeamInput | FileRecordUpdateWithWhereUniqueWithoutTeamInput[]
+    updateMany?: FileRecordUpdateManyWithWhereWithoutTeamInput | FileRecordUpdateManyWithWhereWithoutTeamInput[]
+    deleteMany?: FileRecordScalarWhereInput | FileRecordScalarWhereInput[]
   }
 
   export type ProjectUncheckedUpdateManyWithoutTeamNestedInput = {
@@ -18422,6 +18582,37 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Comment"> | Date | string
   }
 
+  export type TeamCreateWithoutFilesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    avatar?: string | null
+    color?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    members?: TeamMemberCreateNestedManyWithoutTeamInput
+    posts?: PostCreateNestedManyWithoutTeamInput
+    projects?: ProjectCreateNestedManyWithoutTeamInput
+  }
+
+  export type TeamUncheckedCreateWithoutFilesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    avatar?: string | null
+    color?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+    projects?: ProjectUncheckedCreateNestedManyWithoutTeamInput
+  }
+
+  export type TeamCreateOrConnectWithoutFilesInput = {
+    where: TeamWhereUniqueInput
+    create: XOR<TeamCreateWithoutFilesInput, TeamUncheckedCreateWithoutFilesInput>
+  }
+
   export type UserCreateWithoutFileRecordsInput = {
     id?: string
     userName: string
@@ -18502,6 +18693,43 @@ export namespace Prisma {
   export type PostCreateOrConnectWithoutFilesInput = {
     where: PostWhereUniqueInput
     create: XOR<PostCreateWithoutFilesInput, PostUncheckedCreateWithoutFilesInput>
+  }
+
+  export type TeamUpsertWithoutFilesInput = {
+    update: XOR<TeamUpdateWithoutFilesInput, TeamUncheckedUpdateWithoutFilesInput>
+    create: XOR<TeamCreateWithoutFilesInput, TeamUncheckedCreateWithoutFilesInput>
+    where?: TeamWhereInput
+  }
+
+  export type TeamUpdateToOneWithWhereWithoutFilesInput = {
+    where?: TeamWhereInput
+    data: XOR<TeamUpdateWithoutFilesInput, TeamUncheckedUpdateWithoutFilesInput>
+  }
+
+  export type TeamUpdateWithoutFilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    posts?: PostUpdateManyWithoutTeamNestedInput
+    projects?: ProjectUpdateManyWithoutTeamNestedInput
+  }
+
+  export type TeamUncheckedUpdateWithoutFilesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+    projects?: ProjectUncheckedUpdateManyWithoutTeamNestedInput
   }
 
   export type UserUpsertWithoutFileRecordsInput = {
@@ -18761,6 +18989,7 @@ export namespace Prisma {
     errorMessage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    team?: TeamCreateNestedOneWithoutFilesInput
     uploader: UserCreateNestedOneWithoutFileRecordsInput
   }
 
@@ -18775,6 +19004,7 @@ export namespace Prisma {
     size?: string
     status?: $Enums.ProcessStatus
     errorMessage?: string | null
+    teamId?: string | null
     uploaderId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -18836,6 +19066,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     members?: TeamMemberCreateNestedManyWithoutTeamInput
+    files?: FileRecordCreateNestedManyWithoutTeamInput
     projects?: ProjectCreateNestedManyWithoutTeamInput
   }
 
@@ -18848,6 +19079,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
+    files?: FileRecordUncheckedCreateNestedManyWithoutTeamInput
     projects?: ProjectUncheckedCreateNestedManyWithoutTeamInput
   }
 
@@ -18956,6 +19188,7 @@ export namespace Prisma {
     size?: StringFilter<"FileRecord"> | string
     status?: EnumProcessStatusFilter<"FileRecord"> | $Enums.ProcessStatus
     errorMessage?: StringNullableFilter<"FileRecord"> | string | null
+    teamId?: StringNullableFilter<"FileRecord"> | string | null
     uploaderId?: StringFilter<"FileRecord"> | string
     postId?: StringNullableFilter<"FileRecord"> | string | null
     createdAt?: DateTimeFilter<"FileRecord"> | Date | string
@@ -19025,6 +19258,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: TeamMemberUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUpdateManyWithoutTeamNestedInput
     projects?: ProjectUpdateManyWithoutTeamNestedInput
   }
 
@@ -19037,6 +19271,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUncheckedUpdateManyWithoutTeamNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutTeamNestedInput
   }
 
@@ -19082,6 +19317,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     members?: TeamMemberCreateNestedManyWithoutTeamInput
     posts?: PostCreateNestedManyWithoutTeamInput
+    files?: FileRecordCreateNestedManyWithoutTeamInput
   }
 
   export type TeamUncheckedCreateWithoutProjectsInput = {
@@ -19094,6 +19330,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     members?: TeamMemberUncheckedCreateNestedManyWithoutTeamInput
     posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+    files?: FileRecordUncheckedCreateNestedManyWithoutTeamInput
   }
 
   export type TeamCreateOrConnectWithoutProjectsInput = {
@@ -19227,6 +19464,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: TeamMemberUpdateManyWithoutTeamNestedInput
     posts?: PostUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUpdateManyWithoutTeamNestedInput
   }
 
   export type TeamUncheckedUpdateWithoutProjectsInput = {
@@ -19239,6 +19477,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     members?: TeamMemberUncheckedUpdateManyWithoutTeamNestedInput
     posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUncheckedUpdateManyWithoutTeamNestedInput
   }
 
   export type UserUpsertWithoutProjectsInput = {
@@ -19758,6 +19997,50 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FileRecordCreateWithoutTeamInput = {
+    id?: string
+    shortId?: string | null
+    name: string
+    fileId: string
+    viewerFileId?: string | null
+    category?: $Enums.FileCategory
+    extension?: string | null
+    size?: string
+    status?: $Enums.ProcessStatus
+    errorMessage?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    uploader: UserCreateNestedOneWithoutFileRecordsInput
+    post?: PostCreateNestedOneWithoutFilesInput
+  }
+
+  export type FileRecordUncheckedCreateWithoutTeamInput = {
+    id?: string
+    shortId?: string | null
+    name: string
+    fileId: string
+    viewerFileId?: string | null
+    category?: $Enums.FileCategory
+    extension?: string | null
+    size?: string
+    status?: $Enums.ProcessStatus
+    errorMessage?: string | null
+    uploaderId: string
+    postId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FileRecordCreateOrConnectWithoutTeamInput = {
+    where: FileRecordWhereUniqueInput
+    create: XOR<FileRecordCreateWithoutTeamInput, FileRecordUncheckedCreateWithoutTeamInput>
+  }
+
+  export type FileRecordCreateManyTeamInputEnvelope = {
+    data: FileRecordCreateManyTeamInput | FileRecordCreateManyTeamInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProjectCreateWithoutTeamInput = {
     id?: string
     name: string
@@ -19862,6 +20145,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Post"> | Date | string
   }
 
+  export type FileRecordUpsertWithWhereUniqueWithoutTeamInput = {
+    where: FileRecordWhereUniqueInput
+    update: XOR<FileRecordUpdateWithoutTeamInput, FileRecordUncheckedUpdateWithoutTeamInput>
+    create: XOR<FileRecordCreateWithoutTeamInput, FileRecordUncheckedCreateWithoutTeamInput>
+  }
+
+  export type FileRecordUpdateWithWhereUniqueWithoutTeamInput = {
+    where: FileRecordWhereUniqueInput
+    data: XOR<FileRecordUpdateWithoutTeamInput, FileRecordUncheckedUpdateWithoutTeamInput>
+  }
+
+  export type FileRecordUpdateManyWithWhereWithoutTeamInput = {
+    where: FileRecordScalarWhereInput
+    data: XOR<FileRecordUpdateManyMutationInput, FileRecordUncheckedUpdateManyWithoutTeamInput>
+  }
+
   export type ProjectUpsertWithWhereUniqueWithoutTeamInput = {
     where: ProjectWhereUniqueInput
     update: XOR<ProjectUpdateWithoutTeamInput, ProjectUncheckedUpdateWithoutTeamInput>
@@ -19904,6 +20203,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     posts?: PostCreateNestedManyWithoutTeamInput
+    files?: FileRecordCreateNestedManyWithoutTeamInput
     projects?: ProjectCreateNestedManyWithoutTeamInput
   }
 
@@ -19916,6 +20216,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     posts?: PostUncheckedCreateNestedManyWithoutTeamInput
+    files?: FileRecordUncheckedCreateNestedManyWithoutTeamInput
     projects?: ProjectUncheckedCreateNestedManyWithoutTeamInput
   }
 
@@ -19981,6 +20282,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     posts?: PostUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUpdateManyWithoutTeamNestedInput
     projects?: ProjectUpdateManyWithoutTeamNestedInput
   }
 
@@ -19993,6 +20295,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     posts?: PostUncheckedUpdateManyWithoutTeamNestedInput
+    files?: FileRecordUncheckedUpdateManyWithoutTeamNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutTeamNestedInput
   }
 
@@ -20104,6 +20407,7 @@ export namespace Prisma {
     errorMessage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    team?: TeamCreateNestedOneWithoutFilesInput
     post?: PostCreateNestedOneWithoutFilesInput
   }
 
@@ -20118,6 +20422,7 @@ export namespace Prisma {
     size?: string
     status?: $Enums.ProcessStatus
     errorMessage?: string | null
+    teamId?: string | null
     postId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -20469,6 +20774,7 @@ export namespace Prisma {
     size?: string
     status?: $Enums.ProcessStatus
     errorMessage?: string | null
+    teamId?: string | null
     uploaderId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -20510,6 +20816,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: TeamUpdateOneWithoutFilesNestedInput
     uploader?: UserUpdateOneRequiredWithoutFileRecordsNestedInput
   }
 
@@ -20524,6 +20831,7 @@ export namespace Prisma {
     size?: StringFieldUpdateOperationsInput | string
     status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     uploaderId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20540,6 +20848,7 @@ export namespace Prisma {
     size?: StringFieldUpdateOperationsInput | string
     status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     uploaderId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20792,6 +21101,23 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FileRecordCreateManyTeamInput = {
+    id?: string
+    shortId?: string | null
+    name: string
+    fileId: string
+    viewerFileId?: string | null
+    category?: $Enums.FileCategory
+    extension?: string | null
+    size?: string
+    status?: $Enums.ProcessStatus
+    errorMessage?: string | null
+    uploaderId: string
+    postId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type ProjectCreateManyTeamInput = {
     id?: string
     name: string
@@ -20883,6 +21209,57 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FileRecordUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shortId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    viewerFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: EnumFileCategoryFieldUpdateOperationsInput | $Enums.FileCategory
+    extension?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    uploader?: UserUpdateOneRequiredWithoutFileRecordsNestedInput
+    post?: PostUpdateOneWithoutFilesNestedInput
+  }
+
+  export type FileRecordUncheckedUpdateWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shortId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    viewerFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: EnumFileCategoryFieldUpdateOperationsInput | $Enums.FileCategory
+    extension?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    uploaderId?: StringFieldUpdateOperationsInput | string
+    postId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FileRecordUncheckedUpdateManyWithoutTeamInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shortId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    viewerFileId?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: EnumFileCategoryFieldUpdateOperationsInput | $Enums.FileCategory
+    extension?: NullableStringFieldUpdateOperationsInput | string | null
+    size?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    uploaderId?: StringFieldUpdateOperationsInput | string
+    postId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ProjectUpdateWithoutTeamInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -20953,6 +21330,7 @@ export namespace Prisma {
     size?: string
     status?: $Enums.ProcessStatus
     errorMessage?: string | null
+    teamId?: string | null
     postId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -21058,6 +21436,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    team?: TeamUpdateOneWithoutFilesNestedInput
     post?: PostUpdateOneWithoutFilesNestedInput
   }
 
@@ -21072,6 +21451,7 @@ export namespace Prisma {
     size?: StringFieldUpdateOperationsInput | string
     status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     postId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21088,6 +21468,7 @@ export namespace Prisma {
     size?: StringFieldUpdateOperationsInput | string
     status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     postId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

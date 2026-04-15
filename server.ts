@@ -225,7 +225,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
     const fileName = upload.metadata?.filename;
     const userId = upload.metadata?.userid;
     const userCategory = upload.metadata?.category;
-
+    const rawTeamId = upload.metadata?.teamId;
     // 將task歸納到他屬於的userId內
     if(userId) {
         activeTasksMap.set(fileId, userId);
@@ -237,7 +237,10 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
         console.log(`✅ [Tus] 上傳成功: ${fileName}(ID: ${fileId})`);
         
         const extension = `.${fileName.toLowerCase().split('.').pop()}`;
-        
+        // 🚀 2. 關鍵防呆：前端如果傳 "null" (字串)，我們要轉回真正的 null，代表個人空間
+        const teamId = (rawTeamId && String(rawTeamId) !== "null" && String(rawTeamId) !== "undefined") 
+            ? String(rawTeamId) 
+            : null;
         try{
             // 只有 IFC 需要設為 processing
             const isIfc = extension === '.ifc';
@@ -251,7 +254,8 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
                     size: upload.size ? upload.size.toString() : "0",
                     // IFC 進入加工狀態，其餘檔案直接「已完成」
                     status: isIfc ? 'processing' : 'completed',
-                    uploader: { connect: { id: userId } }
+                    uploaderId: userId,
+                    teamId: teamId
                 }
             })
             console.log(`📦 [Tus] 簽收: ${fileName} (${userCategory}) -> ${isIfc ? '送往加工廠' : '直接入庫'}`);
