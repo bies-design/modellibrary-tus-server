@@ -126,12 +126,12 @@ const tusServer = new Server({
         const originalName = metadata?.name;
 
         if(originalName){
-            // 為了避免中文或特殊符號讓 MinIO 儲存時產生編碼問題，可以做個簡單的編碼
-            // 或是你也可以選擇只抓副檔名。這裡我們採用「隨機碼_原始檔名」的格式
-            // 存進 MinIO 就會變成類似：V1StGXR8_z_my_building.ifc
-            
-            // 替換掉可能造成 URL 路徑解析錯誤的特殊字元 (例如空白換成底線)
-            const safeName = originalName.replace(/[^a-zA-Z0-9.\-_]/g, '_'); 
+           // 使用 Unicode Property Escapes (\p{L} 和 \p{N})
+            // \p{L} 代表任何語言的字母 (包含中文)
+            // \p{N} 代表任何數字
+            // u 標記代表啟用 Unicode 模式
+            // 這樣只會把空白和危險符號換成底線，完美保留中文！
+            const safeName = originalName.replace(/[^\p{L}\p{N}.\-_]/gu, '_'); 
             return `${id}+${safeName}`;
         }
 
