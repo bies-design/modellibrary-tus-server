@@ -280,6 +280,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
             }
         }catch(err: any){
             if(err) console.error(`❌ [Tus] DB 寫入或通知失敗:`, err.message);
+
         }
     }
 });
@@ -305,7 +306,7 @@ app.get('/api/tasks/status', async (req, res) => {
         const activeTasks = await prisma.fileRecord.findMany({
             where: {
                 uploaderId: userId as string,
-                status: { in: ['processing'] }
+                status: { in: ['processing', 'error'] }
             }
         });
 
