@@ -328,6 +328,50 @@ app.get('/api/tasks/status', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch task status" });
     }
 });
+app.post('/api/tasks/retry', async (req, res) =>{
+    const { fileId, userId, priority = 10 } = req.body;
+
+    if(!fileId || !userId){
+        return res.status(400).json({ success: false, error: "缺少必要參數" });
+    }
+
+    try{
+        // 1. 去資料庫驗證該檔案是否真的存在且屬於該使用者
+        const fileRecord = await prisma.fileRecord.findUnique({
+            where: { fileId: fileId }
+        });
+        if (!fileRecord) return res.status(404).json({ success: false, error: "找不到該檔案紀錄" });
+        if (fileRecord.uploaderId !== userId) return res.status(403).json({ success: false, error: "無權限操作" });
+        if (fileRecord.extension !== '.ifc') return res.status(400).json({ success: false, error: "非 IFC 檔案無法轉檔" });
+        
+        // 2. 將資料庫狀態重置為 processing，並清空錯誤訊息
+        await prisma.fileRecord.update({
+            where: { fileId: fileId },
+            data: {
+                status: 'processing',
+                errorMessage: null
+            }
+        });
+
+        // 3. 關鍵動作：將這個重試的任務重新註冊進 Map，這樣 Socket 才能把進度推給該使用者！
+        activeTasksMap.set(fileId, userId);
+
+        // 4. 由 Tus Server 透過內網穿透呼叫 IFC Converter Worker
+        await axios.post(WORKER_WEBHOOK_URL, {
+            fileKey: fileRecord.fileId,
+            fileName: fileRecord.name,
+            dbId: fileRecord.id,
+            userId: userId,
+            priority: priority // 預留的優先權設定
+        });
+
+        console.log(`♻️ [Tus Server] 收到重試請求，已將 ${fileRecord.name} 重新派發給 Worker`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("❌ [Tus Server] 重試派發失敗:", error);
+        res.status(500).json({ success: false, error: "無法重新排隊，請稍後再試" });
+    }
+});
 
 // 掛載上傳路由
 // 注意：Tus 需要處理 HEAD, PATCH, POST 等請求，所以用 app.all
