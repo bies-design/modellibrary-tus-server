@@ -49,6 +49,23 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- API Key 驗證 Middleware ---
+const authMiddleware = (req: any, res: any, next: any) => {
+    const apiKey = req.headers['x-api-key'];
+    const internalKey = process.env.INTERNAL_API_KEY;
+
+    // 只有在生產環境或明確設定時才強制執行，避免影響你本地開發
+    if (!internalKey) {
+        return next();
+    }
+
+    if (!apiKey || apiKey !== internalKey) {
+        console.warn(`🚫 [Security] 未經授權的存取嘗試: ${req.method} ${req.url}`);
+        return res.status(401).json({ success: false, error: "Unauthorized: Invalid API Key" });
+    }
+    next();
+};
+
 const portStr: string = String(process.env.TUS_SERVER_PORT);
 const PORT = parseInt(portStr || "3003", 10); // 我們讓這個服務預設跑在 3003 port
 const HOST = "0.0.0.0"; // 這樣不管是 localhost 還是 Docker 內部網路都能連上，而且前端連線時用的還是 localhost:3003（因為我們在 docker-compose.yml 中做了 port mapping）
@@ -179,7 +196,7 @@ queueEvents.on('progress', ({ jobId, data }:{jobId:string, data:any}) => {
 });
 // 先定義 API 路由 (給 Worker 用的)
 // 這樣可以確保 Tus 的 handle 不會對這個請求造成任何干擾
-app.post('/notify/done', (req:any, res:any)=> {
+app.post('/notify/done', authMiddleware, (req:any, res:any)=> {
     // Debug 用：印出收到的東西，確認 body 是否存在
     console.log("📨 [Debug] /notify/done headers:", req.headers['content-type']);
     console.log("📨 [Debug] /notify/done body:", req.body);
@@ -207,8 +224,8 @@ app.post('/notify/done', (req:any, res:any)=> {
         io.to(userId).emit('conversion-complete', payload);
         console.log(`User: ${userId} 的任務完成 釋放任務tus任務佇列`);
     } else {
-        // 💡 優化：就算沒有 userId，也全頻廣播，確保上傳者一定能收到通知
-        io.emit('conversion-complete', payload);
+        // 沒有 userId，就不回傳 保證其他人不會師到不屬於他的通知
+        // io.emit('conversion-complete', payload);
         console.log(`[Fallback] 找不到該任務的user,使用全頻廣播通知`);
     }
 
@@ -295,7 +312,7 @@ app.get('/health', (req: any, res: any) => {
     });
 });
 
-app.get('/api/tasks/status', async (req, res) => {
+app.get('/api/tasks/status', authMiddleware, async (req, res) => {
     const userId = req.query.userId;
     // 或是用 fileId: const fileId = req.query.fileId;
 
@@ -328,7 +345,7 @@ app.get('/api/tasks/status', async (req, res) => {
         res.status(500).json({ error: "Failed to fetch task status" });
     }
 });
-app.post('/api/tasks/retry', async (req, res) =>{
+app.post('/api/tasks/retry', authMiddleware, async (req, res) =>{
     const { fileId, userId, priority = 10 } = req.body;
 
     if(!fileId || !userId){
