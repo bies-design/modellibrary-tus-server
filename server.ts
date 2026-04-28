@@ -15,7 +15,24 @@ import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 // 目前tus上task對照表 提供哪一個task屬於哪user的對照功能
-const activeTasksMap = new Map();
+// 💡 修改：改為儲存物件，包含 userId 與加入時間，以便定期清理
+const activeTasksMap = new Map<string, { userId: string, timestamp: number }>();
+
+// --- 定義定時清理機制 (解決問題 4) ---
+// 每 30 分鐘檢查一次，移除超過 2 小時的任務對照，防止記憶體洩漏
+setInterval(() => {
+    const now = Date.now();
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+    let count = 0;
+    activeTasksMap.forEach((value, key) => {
+        if (now - value.timestamp > TWO_HOURS) {
+            activeTasksMap.delete(key);
+            count++;
+        }
+    });
+    if (count > 0) console.log(`🧹 [Cleanup] 已移除 ${count} 個過期任務對照`);
+}, 30 * 60 * 1000);
+
 const result = dotenv.config({ path: path.resolve(process.cwd(), '.env') });  // 用 process.cwd() 代替 __dirname
 if (result.error){
     console.warn("Warning: [!] 沒有實體 .env 檔案，將嘗試從環境變數讀取。");
@@ -179,7 +196,8 @@ const conversionQueue = new Queue(ifcConversionQueue, {
 
 // 監聽「進度更新」事件
 queueEvents.on('progress', ({ jobId, data }:{jobId:string, data:any}) => {
-    const userId = activeTasksMap.get(jobId);
+    const taskInfo = activeTasksMap.get(jobId);
+    const userId = taskInfo?.userId;
 
     if(userId){
         io.to(userId).emit('conversion-progress' , {
@@ -205,8 +223,12 @@ app.post('/notify/done', authMiddleware, (req:any, res:any)=> {
         console.error("❌ [Error] req.body is undefined!");
         return res.status(400).json({ error: "No body received" });
     }
-    const {  fileKey, fileName, status, message, size, userId } = req.body;
+    const { fileKey, fileName, status, message, size, userId:bodyUserId } = req.body;
     
+    // 💡 優先使用 activeTasksMap 裡的 userId，找不到才用 body 裡的
+    const taskInfo = activeTasksMap.get(fileKey);
+    const userId = taskInfo?.userId || bodyUserId;
+
     const payload = {
         fileName,
         fileId: fileKey, 
@@ -245,7 +267,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
     const rawTeamId = upload.metadata?.teamId;
     // 將task歸納到他屬於的userId內
     if(userId) {
-        activeTasksMap.set(fileId, userId);
+        activeTasksMap.set(fileId, { userId, timestamp: Date.now() });
     }
 
     console.log("DEBUG: metadata received:", upload.metadata);
@@ -371,7 +393,7 @@ app.post('/api/tasks/retry', authMiddleware, async (req, res) =>{
         });
 
         // 3. 關鍵動作：將這個重試的任務重新註冊進 Map，這樣 Socket 才能把進度推給該使用者！
-        activeTasksMap.set(fileId, userId);
+        activeTasksMap.set(fileId, { userId, timestamp: Date.now() });
 
         // 4. 由 Tus Server 透過內網穿透呼叫 IFC Converter Worker
         await axios.post(WORKER_WEBHOOK_URL, {
