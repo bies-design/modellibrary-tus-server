@@ -13,6 +13,7 @@ import IORedis from 'ioredis';
 import {nanoid} from 'nanoid';
 import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { CopyObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 // 目前tus上task對照表 提供哪一個task屬於哪user的對照功能
 // 💡 修改：改為儲存物件，包含 userId 與加入時間，以便定期清理
@@ -135,6 +136,27 @@ io.on('connection', (socket:any) => {
 // 新版的 @tus/s3-store 中，你通常不需要手動 new S3Client() 再傳進去，
 // 而是直接在 s3ClientConfig 物件中傳入 AWS 的設定參數，S3Store 內部會幫你建立 Client
 const S3_Endpoint_str = `http://${process.env.S3_HOST}:${process.env.S3_PORT}`;  // 需要加上 http:// 避免host&port 在S3Store 類別中錯誤使用
+const s3Client = new S3Client({
+    region: process.env.S3_REGION,
+    endpoint: S3_Endpoint_str,
+    credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY!,
+        secretAccessKey: process.env.S3_SECRET_KEY!,
+    },
+    forcePathStyle: true,
+});
+
+const copyUploadedFileToViewerBucket = async (fileId: string) => {
+    const uploadBucket = process.env.S3_UPLOADASSETS_BUCKET!;
+    const viewerBucket = process.env.S3_VIEWER_ASSETS_BUCKET!;
+
+    await s3Client.send(new CopyObjectCommand({
+        Bucket: viewerBucket,
+        CopySource: `${uploadBucket}/${encodeURIComponent(fileId)}`,
+        Key: fileId,
+    }));
+};
+
 const store = new S3Store({
     partSize: 10 * 1024 * 1024, // 設定每個分片 10MB (保護上傳記憶體穩定)
     s3ClientConfig:{
@@ -283,6 +305,12 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
         try{
             // 只有 IFC 需要設為 processing
             const isIfc = extension === '.ifc';
+            const isFrag = extension === '.frag';
+
+            if(isFrag) {
+                await copyUploadedFileToViewerBucket(fileId);
+                console.log(`📦 [Tus] Frag 直接複製到 Viewer Bucket: ${fileId}`);
+            }
 
             const newFile = await prisma.fileRecord.create({
                 data: {
@@ -293,6 +321,7 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
                     size: upload.size ? upload.size.toString() : "0",
                     // IFC 進入加工狀態，其餘檔案直接「已完成」
                     status: isIfc ? 'processing' : 'completed',
+                    viewerFileId: isFrag ? fileId : null,
                     uploaderId: userId,
                     teamId: teamId
                 }
