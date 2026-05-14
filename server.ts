@@ -170,6 +170,8 @@ const store = new S3Store({
             secretAccessKey: process.env.S3_SECRET_KEY!,
         },
         forcePathStyle: true, // MinIO 必須設為 true
+        requestChecksumCalculation: "WHEN_REQUIRED",
+        responseChecksumValidation: "WHEN_REQUIRED",
     } 
 });
 
