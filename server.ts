@@ -144,6 +144,8 @@ const s3Client = new S3Client({
         secretAccessKey: process.env.S3_SECRET_KEY!,
     },
     forcePathStyle: true,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
 });
 
 const copyUploadedFileToViewerBucket = async (fileId: string) => {
